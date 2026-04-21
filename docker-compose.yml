@@ -1,0 +1,20 @@
+services:
+  localstack:
+    container_name: '${LOCALSTACK_DOCKER_NAME:-localstack-main}'
+    image: localstack/localstack:2026.03
+    ports:
+      - '4566:4566'
+    environment:
+      # LocalStack configuration
+      - SERVICES=s3,dynamodb,sns,lambda,apigateway,logs,iam,sts,cloudformation,ssm
+      # Enable debug mode (optional - set to 1 to enable)
+      - DEBUG=${DEBUG:-0}
+      # Enable persistence (optional - comment out to disable)
+      - PERSISTENCE=${PERSISTENCE:-0}
+      # LocalStack Auth Token required for 2026.03 and later
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN:?}
+    volumes:
+      # Mount docker socket for Lambda execution
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Optional: Persist data between restarts
+      - ./localstack-data:/var/lib/localstack

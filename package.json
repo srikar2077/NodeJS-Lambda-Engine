@@ -1,0 +1,68 @@
+{
+  "name": "@srikar2077/nodejs-lambda-engine",
+  "version": "1.3.0",
+  "description": "A starter project for Lambda functions using Node.js, TypeScript, and a curated technology stack for optimal performance, reliability, and maintainability.",
+  "keywords": [
+    "aws",
+    "lambda",
+    "typescript",
+    "node"
+  ],
+  "homepage": "https://github.com/srikar2077/nodejs-lambda-engine#readme",
+  "bugs": {
+    "url": "https://github.com/srikar2077/nodejs-lambda-engine/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srikar2077/nodejs-lambda-engine.git"
+  },
+  "license": "MIT",
+  "author": "Matthew Warman",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf cdk.out coverage dist",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "test": "jest --coverage=false --silent --verbose",
+    "test:coverage": "jest --coverage --silent --verbose",
+    "test:watch": "jest --watch",
+    "local:start": "docker-compose up -d",
+    "local:stop": "docker-compose down",
+    "local:logs": "docker-compose logs -f localstack",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/aws-lambda": "8.10.161",
+    "@types/jest": "30.0.0",
+    "@types/node": "25.6.0",
+    "@typescript-eslint/eslint-plugin": "8.58.1",
+    "@typescript-eslint/parser": "8.58.1",
+    "eslint": "10.2.0",
+    "eslint-config-prettier": "10.1.8",
+    "globals": "17.4.0",
+    "husky": "9.1.7",
+    "jest": "30.3.0",
+    "prettier": "3.8.2",
+    "rimraf": "6.1.3",
+    "ts-jest": "29.4.9",
+    "ts-node": "10.9.2",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.58.1"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.1028.0",
+    "@aws-sdk/client-lambda": "3.1028.0",
+    "@aws-sdk/client-sns": "3.1028.0",
+    "@aws-sdk/lib-dynamodb": "3.1028.0",
+    "@srikar2077/lambda-utils": "0.9.0",
+    "zod": "4.3.6"
+  }
+}

@@ -1,0 +1,95 @@
+name: Deploy (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      aws_role_arn:
+        description: 'AWS Role ARN for credential assumption'
+        required: true
+        type: string
+      aws_region:
+        description: 'AWS region'
+        required: false
+        type: string
+        default: 'us-east-1'
+      cdk_env:
+        description: 'CDK environment variables'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: 'npm'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ inputs.aws_role_arn }}
+          aws-region: ${{ inputs.aws_region }}
+          role-session-name: deploy-nodejs-lambda-engine
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Install infrastructure dependencies
+        working-directory: ./infrastructure
+        run: npm ci
+
+      - name: Create infrastructure .env file
+        working-directory: ./infrastructure
+        run: echo "${{ inputs.cdk_env }}" > .env
+
+      - name: Build infrastructure
+        working-directory: ./infrastructure
+        run: npm run build
+
+      - name: Bootstrap CDK (if needed)
+        working-directory: ./infrastructure
+        run: |
+          # Check if bootstrap is needed
+          if ! aws cloudformation describe-stacks --stack-name CDKToolkit --region ${{ inputs.aws_region }} >/dev/null 2>&1; then
+            echo "Bootstrapping CDK..."
+            npm run bootstrap
+          else
+            echo "CDK already bootstrapped"
+          fi
+
+      - name: Synthesize CDK stacks
+        working-directory: ./infrastructure
+        run: npm run synth
+
+      - name: Deploy CDK stacks
+        working-directory: ./infrastructure
+        run: npm run deploy:all -- --require-approval never --progress events
+
+      # Final Step: Clean up sensitive infrastructure files
+      - name: Clean up sensitive files
+        if: always()
+        working-directory: ./infrastructure
+        run: |
+          echo "🧹 Cleaning up sensitive files..."
+          rm -f .env
+          rm -rf cdk.out
+          echo "✅ Sensitive files cleaned up"
